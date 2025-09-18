@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 const BACKEND_SERVER = process.env.NEXT_PUBLIC_BACKEND_URL || "api.simplyvpn.eu"
 const FINLAND_SERVER = "https://fi.simplyvpn.eu:60227/"
 const FINLAND_IP = "5.144.179.145"
+const API_KEY = process.env.SIMPLYVPN_API_KEY || "simplyvpn-default-key-2024"
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,9 +24,11 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${API_KEY}`,
+          "X-API-Key": API_KEY,
         },
         body: JSON.stringify({
-          country: "Finland",
+          country: "finland", // Changed to lowercase to match backend expectation
           server: FINLAND_SERVER,
           serverIp: FINLAND_IP,
           protocol: protocol,
