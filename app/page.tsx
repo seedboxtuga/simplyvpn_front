@@ -56,11 +56,11 @@ export default function Page() {
     }
   }
 
-  const handleGetConfig = async (country: string): Promise<string> => {
+  const handleGetConfig = async (country: string, protocol: string): Promise<string> => {
     const res = await fetch("/api/config", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ country, userId: "verified-user" }),
+      body: JSON.stringify({ country, userId: "verified-user", protocol }),
     })
 
     const data = await res.json()
