@@ -85,7 +85,6 @@ export default function Page() {
               </div>
 
               <div className="space-y-4">
-                
                 <p className="text-muted-foreground text-lg text-pretty max-w-md mx-auto">
                   Verify your identity with World ID to access secure VPN configurations
                 </p>
@@ -179,12 +178,8 @@ export default function Page() {
 
             <Card className="max-w-md mx-auto">
               <CardHeader className="text-center">
-                <CardTitle className="flex items-center justify-center gap-2">
-                  
-                  World ID Verification
-                </CardTitle>
+                <CardTitle className="flex items-center justify-center gap-2">World ID Verification</CardTitle>
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  
                   <span>Powered by World ID</span>
                 </div>
               </CardHeader>
@@ -209,17 +204,13 @@ export default function Page() {
           <div className="space-y-8">
             <div className="text-center space-y-4">
               <div className="flex flex-col items-center gap-4">
-                <Image src="/logo.png" alt="SimplyVPN" width={48} height={48} className="rounded-lg" />
+                <Image src="/logo.png" alt="SimplyVPN" width={64} height={64} className="rounded-lg" />
                 <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
                   <Shield className="w-8 h-8 text-primary" />
                 </div>
               </div>
               <h2 className="text-2xl font-bold text-balance">Verification Complete</h2>
               <p className="text-muted-foreground">Choose a country to get your VPN configuration</p>
-              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Image src="/worldcoin-logo.jpg" alt="World ID" width={14} height={14} />
-                <span>Verified with World ID</span>
-              </div>
             </div>
 
             <div className="space-y-6">
