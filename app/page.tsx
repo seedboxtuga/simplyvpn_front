@@ -179,9 +179,6 @@ export default function Page() {
             <Card className="max-w-md mx-auto">
               <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2">World ID Verification</CardTitle>
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <span>Powered by World ID</span>
-                </div>
               </CardHeader>
               <CardContent>
                 <Button onClick={handleVerify} disabled={busy} className="w-full h-12 text-base" size="lg">
@@ -205,9 +202,6 @@ export default function Page() {
             <div className="text-center space-y-4">
               <div className="flex flex-col items-center gap-4">
                 <Image src="/logo.png" alt="SimplyVPN" width={64} height={64} className="rounded-lg" />
-                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Shield className="w-8 h-8 text-primary" />
-                </div>
               </div>
               <h2 className="text-2xl font-bold text-balance">Verification Complete</h2>
               <p className="text-muted-foreground">Choose a country to get your VPN configuration</p>
