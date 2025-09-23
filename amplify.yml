@@ -1,0 +1,25 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - echo "Installing dependencies..."
+            - nvm install 20 || (nvm cache clear && nvm install 20)
+            - nvm use 20
+            - corepack enable
+            - corepack prepare pnpm@10.16.0 --activate
+            - pnpm install --frozen-lockfile
+        build:
+          commands:
+            - echo "Building Next.js application..."
+            - pnpm run build
+      artifacts:
+        baseDirectory: .next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
+          - pnpm-lock.yaml
