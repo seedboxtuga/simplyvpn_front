@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, EyeOff, Copy, Check, Shield } from "lucide-react"
+import { Eye, EyeOff, Copy, Check, Shield, AlertCircle, CheckCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface CountryCardProps {
   country: string
@@ -20,9 +21,6 @@ const VPN_PROTOCOLS = [
   { value: "vless", label: "VLESS", description: "Lightweight V2Ray" },
   { value: "trojan", label: "Trojan", description: "TLS-based" },
   { value: "shadowsocks", label: "Shadowsocks", description: "SOCKS5 proxy" },
-  { value: "tunnel", label: "Tunnel", description: "HTTP tunnel" },
-  { value: "mixed", label: "Mixed", description: "Multi-protocol" },
-  { value: "http", label: "HTTP", description: "HTTP proxy" },
 ]
 
 export function CountryCard({ country, flag, onGetConfig, disabled }: CountryCardProps) {
@@ -31,6 +29,10 @@ export function CountryCard({ country, flag, onGetConfig, disabled }: CountryCar
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [selectedProtocol, setSelectedProtocol] = useState<string>("wireguard")
+  const [feedback, setFeedback] = useState<{ type: "success" | "error" | null; message: string }>({
+    type: null,
+    message: "",
+  })
 
   const handleViewConfig = async () => {
     if (config && isRevealed) {
@@ -40,11 +42,18 @@ export function CountryCard({ country, flag, onGetConfig, disabled }: CountryCar
 
     if (!config || !selectedProtocol) {
       setLoading(true)
+      setFeedback({ type: null, message: "" })
+
       try {
+        console.log("[v0] Requesting config for protocol:", selectedProtocol)
         const configData = await onGetConfig(country, selectedProtocol)
         setConfig(configData)
+        setFeedback({ type: "success", message: `${selectedProtocolInfo?.label} config generated successfully!` })
       } catch (error) {
-        console.error("Failed to get config:", error)
+        console.error("[v0] Failed to get config:", error)
+        const errorMessage = error instanceof Error ? error.message : "Failed to generate config"
+        setFeedback({ type: "error", message: errorMessage })
+        return
       } finally {
         setLoading(false)
       }
@@ -57,6 +66,7 @@ export function CountryCard({ country, flag, onGetConfig, disabled }: CountryCar
     setSelectedProtocol(protocol)
     setConfig("")
     setIsRevealed(false)
+    setFeedback({ type: null, message: "" })
   }
 
   const handleCopy = async () => {
@@ -103,6 +113,19 @@ export function CountryCard({ country, flag, onGetConfig, disabled }: CountryCar
             </SelectContent>
           </Select>
         </div>
+
+        {feedback.type && (
+          <Alert className={feedback.type === "success" ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
+            {feedback.type === "success" ? (
+              <CheckCircle className="h-4 w-4 text-green-600" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-red-600" />
+            )}
+            <AlertDescription className={feedback.type === "success" ? "text-green-800" : "text-red-800"}>
+              {feedback.message}
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Button
           onClick={handleViewConfig}

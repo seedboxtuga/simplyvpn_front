@@ -59,6 +59,8 @@ export default function Page() {
   }
 
   const handleGetConfig = async (country: string, protocol: string): Promise<string> => {
+    console.log("[v0] Getting config for:", { country, protocol })
+
     const res = await fetch("/api/config", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -66,12 +68,84 @@ export default function Page() {
     })
 
     const data = await res.json()
+    console.log("[v0] Config API response:", data)
+
     if (data.status === 200) {
       return data.config
     } else {
       throw new Error(data.error || "Failed to get config")
     }
   }
+
+  const ProtocolInfoSection = () => (
+    <div className="max-w-3xl mx-auto">
+      <Collapsible open={showProtocolInfo} onOpenChange={setShowProtocolInfo}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="mb-4 bg-transparent">
+            <Info className="w-4 h-4 mr-2" />
+            Learn About VPN Protocols
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-blue-600">🔹 VMess</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Original V2Ray protocol, encrypted by default. Supports obfuscation and routing rules. Best for
+                      general-purpose censorship circumvention.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-green-600">🔹 VLESS</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Successor to VMess, faster and lighter. Works well with TLS 1.3. Ideal for speed + stealth in
+                      modern censorship environments.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-purple-600">🔹 Trojan</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Designed to look like normal HTTPS traffic. Uses real TLS certificates. Perfect when you need to
+                      be indistinguishable from web browsing.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-orange-600">🔹 Shadowsocks</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Secure SOCKS5 proxy with encryption. Lightweight and high speed. Great for fast browsing with some
+                      censorship resistance.
+                    </p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold text-cyan-600">🔹 WireGuard</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Modern VPN protocol, kernel-level, fast and secure. High performance with strong encryption. Best
+                      for general VPN use.
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t">
+                    <p className="text-xs text-muted-foreground">
+                      <strong>Stealth ranking:</strong> Shadowsocks → WireGuard → VMess → VLESS → Trojan
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  )
 
   return (
     <main className="min-h-screen bg-background">
@@ -91,90 +165,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="max-w-3xl mx-auto">
-              <Collapsible open={showProtocolInfo} onOpenChange={setShowProtocolInfo}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="mb-4 bg-transparent">
-                    <Info className="w-4 h-4 mr-2" />
-                    Learn About VPN Protocols
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-4">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold text-blue-600">🔹 VMess</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Original V2Ray protocol, encrypted by default. Supports obfuscation and routing rules.
-                              Best for general-purpose censorship circumvention.
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-semibold text-green-600">🔹 VLESS</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Successor to VMess, faster and lighter. Works well with TLS 1.3. Ideal for speed + stealth
-                              in modern censorship environments.
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-semibold text-purple-600">🔹 Trojan</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Designed to look like normal HTTPS traffic. Uses real TLS certificates. Perfect when you
-                              need to be indistinguishable from web browsing.
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-semibold text-orange-600">🔹 Shadowsocks</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Secure SOCKS5 proxy with encryption. Lightweight and high speed. Great for fast browsing
-                              with some censorship resistance.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold text-cyan-600">🔹 WireGuard</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Modern VPN protocol, kernel-level, fast and secure. High performance with strong
-                              encryption. Best for general VPN use.
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-semibold text-red-600">🔹 Mixed</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Multi-protocol handler with fallback options. Adapts depending on what's allowed. Use when
-                              one protocol isn't enough.
-                            </p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-semibold text-gray-600">🔹 HTTP Proxy</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Simple web proxy, widely compatible. Good for light use like browsing blocked sites, but
-                              weak against modern censorship.
-                            </p>
-                          </div>
-
-                          <div className="pt-2 border-t">
-                            <p className="text-xs text-muted-foreground">
-                              <strong>Stealth ranking:</strong> HTTP → Shadowsocks → WireGuard → Mixed → VMess → VLESS →
-                              Trojan
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
+            <ProtocolInfoSection />
 
             <Card className="max-w-md mx-auto">
               <CardHeader className="text-center">
@@ -206,6 +197,8 @@ export default function Page() {
               <h2 className="text-2xl font-bold text-balance">Verification Complete</h2>
               <p className="text-muted-foreground">Choose a country to get your VPN configuration</p>
             </div>
+
+            <ProtocolInfoSection />
 
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-center">Available Locations</h3>
