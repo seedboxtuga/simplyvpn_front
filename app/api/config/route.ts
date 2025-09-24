@@ -5,19 +5,19 @@ const API_KEY = process.env.SIMPLYVPN_API_KEY || "b9a10a840f380a7c4674e303e2e5ca
 
 export async function POST(req: NextRequest) {
   try {
-    const { country, protocol = "wireguard", server = "1", userId } = await req.json()
+    const { country, protocol = "wireguard", server = "server1", userId } = await req.json()
 
     // Normalize input
     const normalizedCountry = country.toLowerCase()
     const normalizedProtocol = protocol.toLowerCase()
 
-    console.log("[SimplyVPN] Requesting config from backend:", { normalizedCountry, normalizedProtocol, server, userId })
+    console.log("[v0] Requesting config from backend:", { normalizedCountry, normalizedProtocol, server, userId })
 
     const backendResponse = await fetch(`https://${BACKEND_SERVER}/api/generate-config`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${API_KEY}`,
         "X-API-Key": API_KEY,
       },
       body: JSON.stringify({
@@ -28,23 +28,52 @@ export async function POST(req: NextRequest) {
       }),
     })
 
+    console.log("[v0] Backend response status:", backendResponse.status)
+
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text()
-      console.error("[SimplyVPN] Backend error:", backendResponse.status, errorText)
-      return NextResponse.json({ error: "Backend error", details: errorText }, { status: backendResponse.status })
+      console.error("[v0] Backend error:", backendResponse.status, errorText)
+      return NextResponse.json(
+        {
+          status: backendResponse.status,
+          error: "Backend error",
+          details: errorText,
+        },
+        { status: backendResponse.status },
+      )
     }
 
     const backendData = await backendResponse.json()
-    console.log("[SimplyVPN] Config generated successfully")
+    console.log("[v0] Backend response data:", backendData)
 
-    return NextResponse.json({
-      ok: true,
-      config: backendData.config,
-      country: normalizedCountry,
-      protocol: normalizedProtocol,
-    })
+    if (backendData.ok && backendData.config) {
+      console.log("[v0] Config generated successfully")
+      return NextResponse.json({
+        status: 200,
+        config: backendData.config,
+        country: normalizedCountry,
+        protocol: normalizedProtocol,
+      })
+    } else {
+      console.error("[v0] Backend returned invalid response:", backendData)
+      return NextResponse.json(
+        {
+          status: 500,
+          error: "Invalid backend response",
+          details: backendData,
+        },
+        { status: 500 },
+      )
+    }
   } catch (error: any) {
-    console.error("[SimplyVPN] API route error:", error)
-    return NextResponse.json({ error: "Failed to generate config", details: error.message }, { status: 500 })
+    console.error("[v0] API route error:", error)
+    return NextResponse.json(
+      {
+        status: 500,
+        error: "Failed to generate config",
+        details: error.message,
+      },
+      { status: 500 },
+    )
   }
 }

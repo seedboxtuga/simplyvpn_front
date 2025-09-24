@@ -70,10 +70,11 @@ export default function Page() {
     const data = await res.json()
     console.log("[v0] Config API response:", data)
 
-    if (data.status === 200) {
+    if (data.status === 200 && data.config) {
       return data.config
     } else {
-      throw new Error(data.error || "Failed to get config")
+      const errorMessage = data.error || data.details || "Failed to get config"
+      throw new Error(errorMessage)
     }
   }
 
