@@ -19,9 +19,8 @@ export default function Page() {
     setBusy(true)
 
     try {
-      if (!MiniKit.isInstalled()) {
-        return
-      }
+      // Do NOT early-return if not installed; allow verification flow to proceed.
+      // if (!MiniKit.isInstalled()) { return }
 
       const action = process.env.NEXT_PUBLIC_WORLD_ACTION || "vpnlogin"
 
@@ -30,7 +29,7 @@ export default function Page() {
         verification_level: VerificationLevel.Orb,
       })
 
-      if (finalPayload.status === "error") {
+      if ((finalPayload as any)?.status === "error") {
         console.error("Verification failed:", finalPayload)
         return
       }
@@ -46,7 +45,12 @@ export default function Page() {
       })
 
       const json = await res.json()
-      if (json.status === 200) {
+
+      // Accept either HTTP 200 or body.ok === true
+      if (res.ok || json?.ok === true) {
+        setVerified(true)
+      } else if (json?.status === 200) {
+        // Backward compatibility with older body shape
         setVerified(true)
       } else {
         console.error("Verification failed:", json)
@@ -70,7 +74,7 @@ export default function Page() {
     const data = await res.json()
     console.log("[v0] Config API response:", data)
 
-    if (data.status === 200) {
+    if (data.status === 200 || res.ok) {
       return data.config
     } else {
       throw new Error(data.error || "Failed to get config")
@@ -148,65 +152,65 @@ export default function Page() {
   )
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {!verified ? (
-          <div className="text-center space-y-8">
-            <div className="flex flex-col items-center space-y-6">
-              <div className="flex items-center gap-4">
-                <Image src="/logo.png" alt="SimplyVPN" width={64} height={64} className="rounded-lg" />
-                <h1 className="text-4xl font-bold text-primary">simplyVPN</h1>
+      <main className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          {!verified ? (
+            <div className="text-center space-y-8">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="flex items-center gap-4">
+                  <Image src="/logo.png" alt="SimplyVPN" width={64} height={64} className="rounded-lg" />
+                  <h1 className="text-4xl font-bold text-primary">simplyVPN</h1>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-muted-foreground text-lg text-pretty max-w-md mx-auto">
+                    Verify your identity with World ID to access secure VPN configurations
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-4">
-                <p className="text-muted-foreground text-lg text-pretty max-w-md mx-auto">
-                  Verify your identity with World ID to access secure VPN configurations
-                </p>
+              <ProtocolInfoSection />
+
+              <Card className="max-w-md mx-auto">
+                <CardHeader className="text-center">
+                  <CardTitle className="flex items-center justify-center gap-2">World ID Verification</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={handleVerify} disabled={busy} className="w-full h-12 text-base" size="lg">
+                    {busy ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Verifying...
+                      </>
+                    ) : (
+                      <>
+                        <Shield className="w-5 h-5 mr-2" />
+                        Verify with World ID
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <div className="text-center space-y-4">
+                <div className="flex flex-col items-center gap-4">
+                  <Image src="/logo.png" alt="SimplyVPN" width={64} height={64} className="rounded-lg" />
+                </div>
+                <h2 className="text-2xl font-bold text-balance">Verification Complete</h2>
+                <p className="text-muted-foreground">Choose a country to get your VPN configuration</p>
+              </div>
+
+              <ProtocolInfoSection />
+
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-center">Available Locations</h3>
+                <CountryCard country="Finland" flag="🇫🇮" />
               </div>
             </div>
-
-            <ProtocolInfoSection />
-
-            <Card className="max-w-md mx-auto">
-              <CardHeader className="text-center">
-                <CardTitle className="flex items-center justify-center gap-2">World ID Verification</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={handleVerify} disabled={busy} className="w-full h-12 text-base" size="lg">
-                  {busy ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="w-5 h-5 mr-2" />
-                      Verify with World ID
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            <div className="text-center space-y-4">
-              <div className="flex flex-col items-center gap-4">
-                <Image src="/logo.png" alt="SimplyVPN" width={64} height={64} className="rounded-lg" />
-              </div>
-              <h2 className="text-2xl font-bold text-balance">Verification Complete</h2>
-              <p className="text-muted-foreground">Choose a country to get your VPN configuration</p>
-            </div>
-
-            <ProtocolInfoSection />
-
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-center">Available Locations</h3>
-              <CountryCard country="Finland" flag="🇫🇮" onGetConfig={handleGetConfig} />
-            </div>
-          </div>
-        )}
-      </div>
-    </main>
+          )}
+        </div>
+      </main>
   )
 }
