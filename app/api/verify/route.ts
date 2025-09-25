@@ -1,26 +1,37 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { verifyCloudProof, type IVerifyResponse, type ISuccessResult } from "@worldcoin/minikit-js"
 
-interface IRequestPayload {
+type RequestBody = {
   payload: ISuccessResult
   action: string
-  signal: string | undefined
+  signal?: string | null
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { payload, action, signal } = (await req.json()) as IRequestPayload
+    const { payload, action, signal } = (await req.json()) as RequestBody
+
     const app_id = process.env.WORLD_APP_ID as `app_${string}` | undefined
     if (!app_id) {
-      return NextResponse.json({ status: 500, error: "Missing WORLD_APP_ID" })
+      return NextResponse.json({ ok: false, error: "Missing WORLD_APP_ID" }, { status: 500 })
     }
-    const verifyRes = (await verifyCloudProof(payload, app_id, action, signal)) as IVerifyResponse
+
+    const verifyRes = (await verifyCloudProof(
+      payload,
+      app_id,
+      action,
+      signal ?? undefined
+    )) as IVerifyResponse
+
     if (verifyRes.success) {
-      return NextResponse.json({ status: 200, verifyRes })
+      return NextResponse.json({ ok: true, verifyRes }, { status: 200 })
     } else {
-      return NextResponse.json({ status: 400, verifyRes })
+      return NextResponse.json({ ok: false, verifyRes }, { status: 400 })
     }
-  } catch {
-    return NextResponse.json({ status: 500, error: "Server error" })
+  } catch (e: any) {
+    return NextResponse.json(
+      { ok: false, error: e?.message ?? "Server error" },
+      { status: 500 }
+    )
   }
 }
