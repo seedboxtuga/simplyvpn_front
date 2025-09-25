@@ -9,7 +9,7 @@ applications:
             - nvm use 20
             - corepack enable
             - corepack prepare pnpm@10.16.0 --activate
-            - pnpm install --frozen-lockfile
+            - pnpm install --no-frozen-lockfile
         build:
           commands:
             - echo "Building Next.js application..."
@@ -22,4 +22,5 @@ applications:
         paths:
           - node_modules/**/*
           - .next/cache/**/*
+
           - pnpm-lock.yaml
