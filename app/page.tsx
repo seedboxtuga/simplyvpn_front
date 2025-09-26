@@ -61,7 +61,7 @@ export default function Page() {
 
       const json = await res.json()
 
-      if (res.ok || json?.ok === true || json?.status === 200) {
+      if (res.ok || json?.ok === true || json?.status === 200 || json?.verifyRes?.success === true) {
         setVerified(true)
         if (typeof window !== "undefined") localStorage.setItem("svpn_verified", "1")
       } else {
