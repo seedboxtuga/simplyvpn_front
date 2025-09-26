@@ -11,7 +11,11 @@ export async function POST(req: NextRequest) {
   try {
     const { payload, action, signal } = (await req.json()) as RequestBody
 
-    const app_id = process.env.WORLD_APP_ID as `app_${string}` | undefined
+    // Accept either server-only or (if misconfigured) public env var for app id
+    const app_id =
+      (process.env.WORLD_APP_ID as `app_${string}` | undefined) ||
+      (process.env.NEXT_PUBLIC_WORLD_APP_ID as `app_${string}` | undefined)
+
     if (!app_id) {
       return NextResponse.json({ ok: false, error: "Missing WORLD_APP_ID" }, { status: 500 })
     }
